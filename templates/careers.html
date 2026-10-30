@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}AI Cybersecurity Career Advisor - Cyber Copilot{% endblock %}
+{% block page_title %}AI Cybersecurity Career Advisor{% endblock %}
+
+{% block content %}
+<div class="cyber-card" style="margin-bottom: 28px;">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <div style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 12px; background: rgba(0, 242, 254, 0.1); color: var(--cyber-cyan); font-size: 11px; font-family: var(--font-mono); margin-bottom: 6px;">
+        <span>AI MATCH ALGORITHM</span>
+      </div>
+      <h2 style="font-size: 22px; font-weight: 700; color: var(--text-bright);">
+        Ranked Career Paths for Your Profile
+      </h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+        Evaluated against your known languages, operating systems, networking foundation, and designated interests.
+      </p>
+    </div>
+
+    <div>
+      <a href="{{ url_for('profile') }}" class="btn btn-secondary btn-sm">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        <span>Update Skills Profile</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Career Grid -->
+<div class="careers-grid">
+  {% for career in recommendations %}
+  <div class="career-card {% if profile.preferred_career == career.career_title %}preferred-active{% endif %}">
+    <div>
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px;">
+        <h3 style="font-size: 19px; font-weight: 700; color: var(--text-bright);">
+          {{ career.career_title }}
+        </h3>
+        <div class="match-gauge {% if career.match_percentage >= 70 %}match-high{% else %}match-med{% endif %}">
+          {{ career.match_percentage }}% Match
+        </div>
+      </div>
+
+      {% if profile.preferred_career == career.career_title %}
+      <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--cyber-green); font-family: var(--font-mono); font-weight: 600; margin-bottom: 10px;">
+        <span class="status-dot"></span>
+        <span>YOUR ACTIVE GOAL</span>
+      </div>
+      {% endif %}
+
+      <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">
+        {{ career.description }}
+      </p>
+
+      <!-- Key Skills Tags -->
+      <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.8px;">
+        Essential Technical Skills:
+      </div>
+      <div class="tag-cloud">
+        {% for sk in career.required_skills[:4] %}
+          <span class="cyber-tag">{{ sk }}</span>
+        {% endfor %}
+      </div>
+
+      <!-- Tools Tags -->
+      <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.8px; margin-top: 10px;">
+        Core Tools & Technologies:
+      </div>
+      <div class="tag-cloud">
+        {% for tool in career.tools_tech[:4] %}
+          <span class="cyber-tag" style="color: var(--cyber-cyan); border-color: rgba(0, 242, 254, 0.2);">{{ tool }}</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; gap: 8px;">
+        <!-- Modal Trigger Button -->
+        <button type="button" class="btn btn-cyber-outline btn-sm" style="flex: 1;" data-open-modal="modal-{{ loop.index }}">
+          <span>Full Career Blueprint &rarr;</span>
+        </button>
+
+        {% if profile.preferred_career != career.career_title %}
+        <form method="POST" action="{{ url_for('set_preferred_career') }}">
+          <input type="hidden" name="career_title" value="{{ career.career_title }}">
+          <button type="submit" class="btn btn-secondary btn-sm" title="Select as active roadmap target">
+            Set Goal
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal Dialog for this Career -->
+  <dialog class="cyber-modal" id="modal-{{ loop.index }}">
+    <div class="modal-header">
+      <div>
+        <div style="font-size: 11px; font-family: var(--font-mono); color: var(--cyber-cyan);">CAREER BLUEPRINT</div>
+        <h3 style="font-size: 20px; font-weight: 700;">{{ career.career_title }}</h3>
+      </div>
+      <button type="button" class="alert-close" data-close-modal aria-label="Close dialog">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <p style="font-size: 14px; color: var(--text-main); line-height: 1.6; margin-bottom: 20px;">
+        {{ career.description }}
+      </p>
+
+      <h4 style="font-size: 15px; color: var(--cyber-cyan); margin-bottom: 8px;">Required Technical Skills</h4>
+      <div class="tag-cloud" style="margin-bottom: 16px;">
+        {% for s in career.required_skills %}
+          <span class="skill-pill pill-green">{{ s }}</span>
+        {% endfor %}
+      </div>
+
+      <h4 style="font-size: 15px; color: var(--cyber-cyan); margin-bottom: 8px;">Important Tools & Technologies</h4>
+      <div class="tag-cloud" style="margin-bottom: 16px;">
+        {% for t in career.tools_tech %}
+          <span class="skill-pill pill-yellow">{{ t }}</span>
+        {% endfor %}
+      </div>
+
+      <h4 style="font-size: 15px; color: var(--cyber-cyan); margin-bottom: 8px;">Beginner-Friendly Resources</h4>
+      <ul style="padding-left: 20px; font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        {% for r in career.beginner_resources %}
+          <li style="margin-bottom: 6px;">
+            <a href="{{ r.url }}" target="_blank" rel="noopener" style="color: var(--cyber-cyan); font-weight: 600;">
+              {{ r.title }}
+            </a>
+            - <span style="font-size: 11px; font-family: var(--font-mono); color: var(--text-dim);">{{ r.type }} ({{ 'Free' if r.free else 'Paid / Subscription' }})</span>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <h4 style="font-size: 15px; color: var(--cyber-cyan); margin-bottom: 8px;">Relevant Certifications</h4>
+      <div class="tag-cloud" style="margin-bottom: 16px;">
+        {% for cert in career.certifications %}
+          <span class="cyber-tag" style="border-color: rgba(168, 85, 247, 0.4); color: #d8b4fe;">{{ cert }}</span>
+        {% endfor %}
+      </div>
+
+      <h4 style="font-size: 15px; color: var(--cyber-cyan); margin-bottom: 8px;">Suitable Practical Projects</h4>
+      <ul style="padding-left: 20px; font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        {% for proj in career.practical_projects %}
+          <li style="margin-bottom: 6px;">{{ proj }}</li>
+        {% endfor %}
+      </ul>
+
+      <h4 style="font-size: 15px; color: var(--cyber-green); margin-bottom: 8px;">Suggested Immediate Next Steps</h4>
+      <div style="background: rgba(14, 24, 52, 0.8); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px;">
+        <ol style="padding-left: 20px; font-size: 13px; color: var(--text-bright);">
+          {% for step in career.next_steps %}
+            <li style="margin-bottom: 6px;">{{ step }}</li>
+          {% endfor %}
+        </ol>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <form method="POST" action="{{ url_for('set_preferred_career') }}">
+        <input type="hidden" name="career_title" value="{{ career.career_title }}">
+        <button type="submit" class="btn btn-green btn-sm">
+          Select As Active Career Target
+        </button>
+      </form>
+      <button type="button" class="btn btn-secondary btn-sm" data-close-modal>Close</button>
+    </div>
+  </dialog>
+  {% endfor %}
+</div>
+{% endblock %}

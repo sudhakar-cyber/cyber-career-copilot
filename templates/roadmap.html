@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Personalized Learning Roadmap - Cyber Copilot{% endblock %}
+{% block page_title %}Personalized Learning Roadmap{% endblock %}
+
+{% block content %}
+<!-- Top Roadmap Status Banner -->
+<div class="cyber-card" style="margin-bottom: 28px;">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+    <div>
+      <div style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 12px; background: rgba(0, 242, 254, 0.1); color: var(--cyber-cyan); font-size: 11px; font-family: var(--font-mono); margin-bottom: 6px;">
+        <span>6-PHASE STRUCTURED SYLLABUS</span>
+      </div>
+      <h2 style="font-size: 24px; font-weight: 800; color: var(--text-bright);">
+        Career Track: <span style="color: var(--cyber-cyan);">{{ preferred_career }}</span>
+      </h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+        Curated roadmap adapted to your skill level. Click the checkbox next to any task to update your progress.
+      </p>
+    </div>
+
+    <!-- Career Switcher -->
+    <form method="POST" action="{{ url_for('set_preferred_career') }}" style="display: flex; align-items: center; gap: 10px;">
+      <label for="changeCareerSelect" style="font-size: 13px; color: var(--text-muted); font-weight: 600;">Track:</label>
+      <select id="changeCareerSelect" name="career_title" class="form-control" style="width: auto; padding: 8px 14px; font-size: 13px;" onchange="this.form.submit()">
+        {% for c in all_careers %}
+        <option value="{{ c }}" {% if preferred_career == c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+
+  <!-- Overall Progress Bar -->
+  <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle);">
+    <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+      <span style="color: var(--text-muted); font-weight: 600;">Overall Roadmap Completion</span>
+      <span style="font-family: var(--font-mono); font-weight: 700; color: var(--cyber-cyan);">
+        <span id="roadmapProgressText">{{ overall_progress }}%</span> 
+        (<span id="completedTasksCount">{{ completed_tasks }}</span>/{{ total_tasks }} Milestones)
+      </span>
+    </div>
+    <div class="progress-bar-container" style="height: 12px;">
+      <div class="progress-bar-fill" id="roadmapProgressFill" style="width: {{ overall_progress }}%;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 6 Phases Timeline -->
+<div style="display: flex; flex-direction: column; gap: 20px;">
+  {% for phase in phases %}
+  <div class="phase-card">
+    <div class="phase-header">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="phase-badge">Phase {{ phase.phase_number }}</span>
+        <h3 style="font-size: 17px; font-weight: 700; color: var(--text-bright);">
+          {{ phase.phase_title }}
+        </h3>
+      </div>
+      <span style="font-size: 12px; color: var(--text-dim); font-family: var(--font-mono);">
+        {{ phase.tasks | selectattr('is_completed') | list | length }}/{{ phase.tasks | length }} Done
+      </span>
+    </div>
+
+    <div class="tasks-list">
+      {% for task in phase.tasks %}
+      <div class="task-item {% if task.is_completed %}completed{% endif %}" id="task-item-{{ task.id }}">
+        <!-- Toggle button with AJAX -->
+        <button type="button" class="task-checkbox-btn task-toggle-btn" data-task-id="{{ task.id }}" aria-label="Toggle task completion">
+          <div class="task-checkbox-box {% if task.is_completed %}checked{% endif %}">
+            {% if task.is_completed %}
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            {% endif %}
+          </div>
+        </button>
+
+        <div class="task-details">
+          <div class="task-title">{{ task.task_title }}</div>
+          <div class="task-desc">{{ task.description }}</div>
+          {% if task.resource_url %}
+          <a href="{{ task.resource_url }}" target="_blank" rel="noopener" class="task-link">
+            <span>Verified Learning Resource</span>
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

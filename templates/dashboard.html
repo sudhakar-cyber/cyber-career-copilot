@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - AI Cybersecurity Career Copilot{% endblock %}
+{% block page_title %}Cyber Career Command Center{% endblock %}
+
+{% block content %}
+<!-- Career Target Banner -->
+<div class="cyber-card" style="margin-bottom: 26px; background: linear-gradient(135deg, rgba(14, 24, 52, 0.95) 0%, rgba(19, 34, 71, 0.85) 100%);">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <div style="display: flex; align-items: center; gap: 18px;">
+      <div style="width: 58px; height: 58px; border-radius: var(--radius-md); background: rgba(0, 242, 254, 0.12); border: 1px solid var(--border-glow); display: flex; align-items: center; justify-content: center; color: var(--cyber-cyan); flex-shrink: 0;">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-family: var(--font-mono); color: var(--cyber-cyan); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">
+          Active Career Track
+        </div>
+        <h2 style="font-size: 24px; font-weight: 800; color: var(--text-bright);">
+          {{ preferred_career }}
+        </h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+          Student Profile: <span style="color: var(--text-bright); font-weight: 600;">{{ current_user.full_name }}</span> ({{ profile.department }} • {{ profile.year_of_study }} • Level: {{ profile.cyber_level }})
+        </p>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <a href="{{ url_for('skill_gap') }}" class="btn btn-cyber-outline btn-sm">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        <span>Analyze Skill Gap</span>
+      </a>
+      <a href="{{ url_for('careers') }}" class="btn btn-secondary btn-sm">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+        <span>Change Career Goal</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Key Performance Metrics Grid -->
+<div class="metrics-grid">
+  <!-- Metric 1: Roadmap Completion -->
+  <div class="metric-card">
+    <div class="metric-icon-box metric-icon-cyan">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+    </div>
+    <div class="metric-content">
+      <span class="metric-label">Roadmap Progress</span>
+      <span class="metric-value">{{ progress_percentage }}%</span>
+      <span class="metric-subtext">{{ completed_tasks }} of {{ total_tasks }} milestones done</span>
+    </div>
+  </div>
+
+  <!-- Metric 2: Skill Readiness Score -->
+  <div class="metric-card">
+    <div class="metric-icon-box metric-icon-green">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+    </div>
+    <div class="metric-content">
+      <span class="metric-label">Skill Readiness</span>
+      <span class="metric-value">{{ skill_analysis.readiness_score }}%</span>
+      <span class="metric-subtext">{{ skill_analysis.possessed_skills | length }} verified competencies</span>
+    </div>
+  </div>
+
+  <!-- Metric 3: Hands-on Projects -->
+  <div class="metric-card">
+    <div class="metric-icon-box metric-icon-purple">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+    </div>
+    <div class="metric-content">
+      <span class="metric-label">Defensive Projects</span>
+      <span class="metric-value">{{ project_stats.completed_projects or 0 }}/{{ project_stats.total_projects or 9 }}</span>
+      <span class="metric-subtext">{{ project_stats.in_progress_projects or 0 }} actively in development</span>
+    </div>
+  </div>
+
+  <!-- Metric 4: Quiz Average Score -->
+  <div class="metric-card">
+    <div class="metric-icon-box metric-icon-gold">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+    </div>
+    <div class="metric-content">
+      <span class="metric-label">Quiz Mastery</span>
+      <span class="metric-value">
+        {% if quiz_stats.attempts_count and quiz_stats.attempts_count > 0 %}
+          {{ quiz_stats.avg_score | round(1) }}%
+        {% else %}
+          N/A
+        {% endif %}
+      </span>
+      <span class="metric-subtext">{{ quiz_stats.attempts_count or 0 }} quiz sessions attempted</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Split: Left Roadmap & Skills Chart, Right Actions & Quizzes -->
+<div class="dashboard-grid-split">
+  <!-- Left Column -->
+  <div style="display: flex; flex-direction: column; gap: 24px;">
+    <!-- Active Learning Roadmap Widget -->
+    <div class="cyber-card">
+      <div class="card-header-row">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+          <span>Active Learning Roadmap ({{ preferred_career }})</span>
+        </h3>
+        <a href="{{ url_for('roadmap') }}" class="btn btn-cyber-outline btn-sm">Full 6 Phases &rarr;</a>
+      </div>
+
+      <!-- Overall Bar -->
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+          <span style="color: var(--text-muted);">Overall Roadmap Progress</span>
+          <span style="font-weight: 700; color: var(--cyber-cyan); font-family: var(--font-mono);" id="roadmapProgressText">{{ progress_percentage }}%</span>
+        </div>
+        <div class="progress-bar-container" style="height: 10px;">
+          <div class="progress-bar-fill" id="roadmapProgressFill" style="width: {{ progress_percentage }}%;"></div>
+        </div>
+      </div>
+
+      <!-- Next Immediate Tasks -->
+      <h4 style="font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px;">
+        Upcoming Action Tasks
+      </h4>
+
+      {% if upcoming_tasks %}
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        {% for task in upcoming_tasks %}
+        <div class="task-item" id="task-item-{{ task.id }}">
+          <button class="task-checkbox-btn task-toggle-btn" data-task-id="{{ task.id }}" aria-label="Mark task completed">
+            <div class="task-checkbox-box {% if task.is_completed %}checked{% endif %}">
+              {% if task.is_completed %}
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              {% endif %}
+            </div>
+          </button>
+          <div class="task-details">
+            <div class="task-title">{{ task.task_title }}</div>
+            <div class="task-desc">{{ task.description }}</div>
+            <span class="phase-badge" style="font-size: 11px;">Phase {{ task.phase_number }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="padding: 20px; text-align: center; color: var(--cyber-green); background: rgba(0, 255, 204, 0.05); border-radius: var(--radius-md); border: 1px dashed rgba(0, 255, 204, 0.3);">
+        🎉 Outstanding! All roadmap tasks in this track are complete. Explore intermediate certifications or practical capstones!
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Chart: Skill Distribution Radar -->
+    <div class="cyber-card">
+      <div class="card-header-row">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>Cyber Competency Radar</span>
+        </h3>
+        <span style="font-size: 12px; color: var(--text-dim); font-family: var(--font-mono);">Profile-Calibrated</span>
+      </div>
+      <div style="max-height: 280px; position: relative;">
+        <canvas id="skillsRadarChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column -->
+  <div style="display: flex; flex-direction: column; gap: 24px;">
+    <!-- Recommended Next Actions -->
+    <div class="cyber-card">
+      <div class="card-header-row">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <span>Recommended Next Actions</span>
+        </h3>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="padding: 14px; background: rgba(14, 24, 52, 0.6); border-radius: var(--radius-md); border-left: 3px solid var(--cyber-cyan);">
+          <div style="font-size: 14px; font-weight: 600; color: var(--text-bright); margin-bottom: 2px;">
+            1. Address Priority Foundational Gaps
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+            {{ skill_analysis.priority_learning[0] if skill_analysis.priority_learning else "Review core TCP/IP and Linux command line fundamentals." }}
+          </p>
+          <a href="{{ url_for('skill_gap') }}" style="font-size: 12px; font-weight: 600; color: var(--cyber-cyan);">View Skill Gap Breakdown &rarr;</a>
+        </div>
+
+        <div style="padding: 14px; background: rgba(14, 24, 52, 0.6); border-radius: var(--radius-md); border-left: 3px solid var(--cyber-green);">
+          <div style="font-size: 14px; font-weight: 600; color: var(--text-bright); margin-bottom: 2px;">
+            2. Build Recommended Practical Project
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+            Start "{{ top_career.practical_projects[0] if top_career else 'Password Strength Checker' }}" to demonstrate hands-on competence on GitHub.
+          </p>
+          <a href="{{ url_for('projects') }}" style="font-size: 12px; font-weight: 600; color: var(--cyber-green);">Open Projects Catalog &rarr;</a>
+        </div>
+
+        <div style="padding: 14px; background: rgba(14, 24, 52, 0.6); border-radius: var(--radius-md); border-left: 3px solid var(--cyber-purple);">
+          <div style="font-size: 14px; font-weight: 600; color: var(--text-bright); margin-bottom: 2px;">
+            3. Test Knowledge in Interview Simulator
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+            Practice defensive scenario questions and technical MCQs tailored for {{ preferred_career }}.
+          </p>
+          <a href="{{ url_for('interview') }}" style="font-size: 12px; font-weight: 600; color: #c084fc;">Start Practice Quiz &rarr;</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills Breakdown Preview -->
+    <div class="cyber-card">
+      <div class="card-header-row">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span>Skills Status Overview</span>
+        </h3>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 600; color: var(--cyber-green); margin-bottom: 6px;">
+          ✓ Skills Possessed ({{ skill_analysis.possessed_skills | length }})
+        </div>
+        <div class="skill-pills-list" style="margin-bottom: 14px;">
+          {% for sk in skill_analysis.possessed_skills %}
+            <span class="skill-pill pill-green">{{ sk }}</span>
+          {% else %}
+            <span style="font-size: 12px; color: var(--text-dim);">No verified skills yet. Update your profile.</span>
+          {% endfor %}
+        </div>
+
+        <div style="font-size: 12px; font-weight: 600; color: #fb7185; margin-bottom: 6px;">
+          ⚠️ Missing / Next to Learn ({{ skill_analysis.missing_foundation | length }})
+        </div>
+        <div class="skill-pills-list">
+          {% for sk in skill_analysis.missing_foundation[:4] %}
+            <span class="skill-pill pill-red">{{ sk }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Quiz Attempts -->
+    <div class="cyber-card">
+      <div class="card-header-row">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          <span>Recent Quiz Scores</span>
+        </h3>
+        <a href="{{ url_for('interview') }}" style="font-size: 12px; color: var(--cyber-blue);">Take Quiz &rarr;</a>
+      </div>
+
+      {% if recent_quizzes %}
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        {% for qz in recent_quizzes %}
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(14, 24, 52, 0.6); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-bright);">{{ qz.category }}</div>
+            <div style="font-size: 11px; color: var(--text-dim);">{{ qz.created_at }}</div>
+          </div>
+          <div style="font-family: var(--font-mono); font-weight: 700; font-size: 13px; {% if qz.percentage >= 70 %}color: var(--cyber-green);{% elif qz.percentage >= 50 %}color: var(--cyber-gold);{% else %}color: #fb7185;{% endif %}">
+            {{ qz.score }}/{{ qz.total_questions }} ({{ qz.percentage }}%)
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p style="font-size: 13px; color: var(--text-dim); text-align: center; padding: 14px 0;">
+        No quizzes attempted yet. Test your knowledge in the interview module!
+      </p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Initialize Chart.js Radar Chart
+  const radarCtx = document.getElementById('skillsRadarChart');
+  if (radarCtx) {
+    new Chart(radarCtx, {
+      type: 'radar',
+      data: {
+        labels: {{ skills_radar.labels | tojson }},
+        datasets: [{
+          label: 'Current Skill Readiness',
+          data: {{ skills_radar.student_scores | tojson }},
+          backgroundColor: 'rgba(0, 242, 254, 0.2)',
+          borderColor: '#00f2fe',
+          borderWidth: 2,
+          pointBackgroundColor: '#00ffcc',
+          pointBorderColor: '#ffffff',
+          pointHoverRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: 'rgba(56, 189, 248, 0.15)' },
+            grid: { color: 'rgba(56, 189, 248, 0.1)' },
+            pointLabels: {
+              color: '#94a3b8',
+              font: { size: 11, family: "'Inter', sans-serif" }
+            },
+            ticks: {
+              display: false,
+              backdropColor: 'transparent',
+              max: 100,
+              min: 0
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Certification & Learning Resource Recommendations - Cyber Copilot{% endblock %}
+{% block page_title %}Certification & Learning Resource Directory{% endblock %}
+
+{% block content %}
+<div class="cyber-card" style="margin-bottom: 26px;">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <div style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 12px; background: rgba(168, 85, 247, 0.12); color: #c084fc; font-size: 11px; font-family: var(--font-mono); margin-bottom: 6px;">
+        <span>INDUSTRY BENCHMARKS & VERIFIED PLATFORMS</span>
+      </div>
+      <h2 style="font-size: 22px; font-weight: 700; color: var(--text-bright);">
+        Verified Cybersecurity Certifications & Lab Platforms
+      </h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+        Curated portfolio of industry certifications with verified exam objectives, prerequisites, and official links.
+      </p>
+    </div>
+
+    <!-- Cost Filter -->
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <a href="{{ url_for('certifications', cost='all', difficulty=diff_filter) }}" class="btn btn-sm {% if cost_filter == 'all' %}btn-primary{% else %}btn-secondary{% endif %}">
+        All Resources
+      </a>
+      <a href="{{ url_for('certifications', cost='free', difficulty=diff_filter) }}" class="btn btn-sm {% if cost_filter == 'free' %}btn-primary{% else %}btn-secondary{% endif %}">
+        Free / Open Labs
+      </a>
+      <a href="{{ url_for('certifications', cost='paid', difficulty=diff_filter) }}" class="btn btn-sm {% if cost_filter == 'paid' %}btn-primary{% else %}btn-secondary{% endif %}">
+        Pro Certifications
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="careers-grid">
+  {% for cert in certifications %}
+  <div class="career-card">
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+        <h3 style="font-size: 18px; font-weight: 700; color: var(--text-bright);">
+          {{ cert.name }}
+        </h3>
+        <span class="cyber-tag" style="{% if 'Beginner' in cert.difficulty %}color: var(--cyber-green); border-color: rgba(0, 255, 204, 0.3);{% elif 'Intermediate' in cert.difficulty %}color: var(--cyber-blue); border-color: rgba(56, 189, 248, 0.3);{% else %}color: #d8b4fe; border-color: rgba(168, 85, 247, 0.3);{% endif %} font-weight: 600;">
+          {{ cert.difficulty }}
+        </span>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <span class="skill-pill {% if cert.is_free %}pill-green{% else %}pill-yellow{% endif %}" style="font-size: 11px;">
+          {{ 'Free / Open Access' if cert.is_free else 'Paid Certification Exam' }}
+        </span>
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--cyber-cyan); letter-spacing: 0.8px; margin-bottom: 4px;">
+          Skills & Domains Covered:
+        </div>
+        <p style="font-size: 13px; color: var(--text-main); line-height: 1.5;">
+          {{ cert.skills_covered }}
+        </p>
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px;">
+          Intended Audience:
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted);">
+          {{ cert.intended_audience }}
+        </p>
+      </div>
+
+      {% if cert.prerequisites %}
+      <div style="margin-bottom: 14px;">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px;">
+          Prerequisites:
+        </div>
+        <p style="font-size: 12px; color: var(--text-dim);">
+          {{ cert.prerequisites }}
+        </p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div style="margin-top: 18px; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+      {% if cert.official_url %}
+      <a href="{{ cert.official_url }}" target="_blank" rel="noopener" class="btn btn-cyber-outline btn-sm" style="width: 100%;">
+        <span>Visit Official Certification Portal</span>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" fill="none">
+  <defs>
+    <linearGradient id="cyberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="100%" stop-color="#4facfe" />
+    </linearGradient>
+    <linearGradient id="neonGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00ffcc" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Cyber Shield Icon -->
+  <g transform="translate(10, 8)">
+    <path d="M22 2 L40 9 L40 23 C40 33 22 42 22 42 C22 42 4 33 4 23 L4 9 Z" 
+          stroke="url(#cyberGrad)" stroke-width="2.5" fill="#0d182e" />
+    <path d="M22 8 L34 13 L34 22 C34 29 22 36 22 36 C22 36 10 29 10 22 L10 13 Z" 
+          stroke="#1e3a5f" stroke-width="1.5" fill="none" opacity="0.6"/>
+    <!-- Terminal prompt symbol inside shield -->
+    <path d="M16 19 L21 23 L16 27" stroke="url(#neonGreen)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+    <line x1="23" y1="27" x2="28" y2="27" stroke="url(#cyberGrad)" stroke-width="2.5" stroke-linecap="round" />
+  </g>
+
+  <!-- Typography -->
+  <text x="64" y="27" font-family="'Outfit', 'Segoe UI', system-ui, sans-serif" font-size="18" font-weight="800" fill="#ffffff" letter-spacing="0.5">
+    CYBER<tspan fill="url(#cyberGrad)">COPILOT</tspan>
+  </text>
+  <text x="65" y="42" font-family="'JetBrains Mono', 'Fira Code', monospace" font-size="9" font-weight="600" fill="#00ffcc" letter-spacing="1.5">
+    AI CAREER ARCHITECT
+  </text>
+</svg>

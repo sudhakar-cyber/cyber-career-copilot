@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Cybersecurity Project Recommendations - Cyber Copilot{% endblock %}
+{% block page_title %}Cybersecurity Project Laboratory{% endblock %}
+
+{% block content %}
+<!-- Top Header & Defensive Notice -->
+<div class="cyber-card" style="margin-bottom: 26px;">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <div style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); color: var(--cyber-green); font-size: 11px; font-family: var(--font-mono); margin-bottom: 6px;">
+        <span class="status-dot"></span>
+        <span>DEFENSIVE SECURITY & AUTHORIZED ENVIRONMENTS</span>
+      </div>
+      <h2 style="font-size: 22px; font-weight: 700; color: var(--text-bright);">
+        Practical Cybersecurity Project Portfolio
+      </h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+        Hands-on tools across 3 difficulty tiers designed to build tangible proof-of-work for student resumes and GitHub repositories.
+      </p>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <a href="{{ url_for('projects', difficulty='All') }}" class="btn btn-sm {% if active_filter == 'All' %}btn-primary{% else %}btn-secondary{% endif %}">
+        All Tiers
+      </a>
+      <a href="{{ url_for('projects', difficulty='Beginner') }}" class="btn btn-sm {% if active_filter == 'Beginner' %}btn-primary{% else %}btn-secondary{% endif %}">
+        Beginner
+      </a>
+      <a href="{{ url_for('projects', difficulty='Intermediate') }}" class="btn btn-sm {% if active_filter == 'Intermediate' %}btn-primary{% else %}btn-secondary{% endif %}">
+        Intermediate
+      </a>
+      <a href="{{ url_for('projects', difficulty='Advanced') }}" class="btn btn-sm {% if active_filter == 'Advanced' %}btn-primary{% else %}btn-secondary{% endif %}">
+        Advanced
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Project Cards List -->
+<div style="display: flex; flex-direction: column; gap: 20px;">
+  {% for proj in projects %}
+  <div class="project-card" id="project-card-{{ proj.id }}" style="{% if proj.status == 'Completed' %}border-color: var(--cyber-green);{% elif proj.status == 'In Progress' %}border-color: var(--cyber-blue);{% endif %}">
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <h3 style="font-size: 19px; font-weight: 700; color: var(--text-bright);">
+          {{ proj.title }}
+        </h3>
+        <span class="cyber-tag" style="{% if proj.difficulty_level == 'Beginner' %}color: var(--cyber-green); border-color: rgba(0, 255, 204, 0.3);{% elif proj.difficulty_level == 'Intermediate' %}color: var(--cyber-blue); border-color: rgba(56, 189, 248, 0.3);{% else %}color: #d8b4fe; border-color: rgba(168, 85, 247, 0.3);{% endif %} font-weight: 600; padding: 4px 10px;">
+          {{ proj.difficulty_level }} Tier
+        </span>
+      </div>
+
+      <!-- Status Selector -->
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label style="font-size: 12px; color: var(--text-muted);">Status:</label>
+        <select class="project-status-select" data-project-id="{{ proj.id }}" aria-label="Project completion status">
+          <option value="Not Started" {% if proj.status == 'Not Started' %}selected{% endif %}>Not Started</option>
+          <option value="In Progress" {% if proj.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+          <option value="Completed" {% if proj.status == 'Completed' %}selected{% endif %}>Completed</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Objective -->
+    <div style="margin-bottom: 14px;">
+      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--cyber-cyan); letter-spacing: 0.8px; margin-bottom: 4px;">
+        Objective
+      </div>
+      <p style="font-size: 14px; color: var(--text-main); line-height: 1.5;">
+        {{ proj.objective }}
+      </p>
+    </div>
+
+    <!-- Prerequisites & Tech Stack -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 16px; background: rgba(14, 24, 52, 0.6); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+      <div>
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px;">
+          Prerequisites
+        </div>
+        <div style="font-size: 13px; color: var(--text-muted);">
+          {{ proj.prerequisites }}
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px;">
+          Suggested Tech Stack
+        </div>
+        <div style="font-size: 13px; color: var(--cyber-cyan); font-family: var(--font-mono);">
+          {{ proj.tech_stack }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Implementation Milestones -->
+    <div style="margin-bottom: 16px;">
+      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--cyber-cyan); letter-spacing: 0.8px; margin-bottom: 6px;">
+        Implementation Milestones
+      </div>
+      <div style="font-size: 13px; color: var(--text-bright); line-height: 1.6; white-space: pre-line; background: rgba(8, 15, 34, 0.7); padding: 12px 16px; border-radius: var(--radius-md); border-left: 3px solid var(--cyber-cyan);">
+        {{ proj.milestones }}
+      </div>
+    </div>
+
+    <!-- Expected Learning Outcomes -->
+    <div>
+      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--cyber-green); letter-spacing: 0.8px; margin-bottom: 4px;">
+        Expected Learning Outcomes
+      </div>
+      <div style="font-size: 13px; color: var(--text-muted);">
+        {{ proj.learning_outcomes }}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

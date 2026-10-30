@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Cyber Copilot AI Assistant - Career Mentor{% endblock %}
+{% block page_title %}Cyber Copilot AI Career Mentor{% endblock %}
+
+{% block content %}
+<div class="chat-window">
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--grad-cyan-blue); display: flex; align-items: center; justify-content: center; color: #050a17;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
+      </div>
+      <div>
+        <div style="font-weight: 700; color: var(--text-bright); display: flex; align-items: center; gap: 8px;">
+          <span>Cyber Copilot</span>
+          {% if ai_status.is_live_ai %}
+            <span class="ai-mode-pill">Live AI Active</span>
+          {% else %}
+            <span class="ai-mode-pill" style="background: rgba(245, 158, 11, 0.12); color: var(--cyber-gold); border-color: rgba(245, 158, 11, 0.3);">
+              Demo Mode (Predefined Guidance)
+            </span>
+          {% endif %}
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">
+          Engine: {{ ai_status.engine }}
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <button type="button" class="btn btn-secondary btn-sm" id="clearChatBtn" title="Clear conversation history">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        <span>Clear Chat</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages History -->
+  <div class="chat-messages" id="chatMessages">
+    <!-- Initial Greeting -->
+    <div class="chat-bubble copilot">
+      {% if not ai_status.is_live_ai %}
+      <blockquote>
+        ℹ️ <strong>[DEMO MODE: Predefined Expert Cybersecurity Guidance]</strong><br>
+        <em>Currently operating on local cybersecurity knowledge base. To enable live inference, supply a GEMINI_API_KEY or OPENAI_API_KEY in your .env file.</em>
+      </blockquote>
+      {% endif %}
+      Hello, <strong>{{ current_user.full_name }}</strong>! I am your <strong>Cyber Copilot</strong>, specialized in college cybersecurity career roadmaps, offensive & defensive security paths, certifications, projects, and interview preparation.
+      <br><br>
+      How can I assist your journey toward <strong>{{ student_profile.preferred_career if student_profile else 'Cybersecurity' }}</strong> today?
+    </div>
+
+    <!-- DB Chat History -->
+    {% for msg in chat_history %}
+      <div class="chat-bubble {{ msg.sender }}">
+        {{ msg.message | replace('\n', '<br>') | safe }}
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Suggestion Chips Bar -->
+  <div class="chat-suggestions">
+    <span style="font-size: 11px; color: var(--text-dim); display: flex; align-items: center; margin-right: 4px;">Suggestions:</span>
+    <button type="button" class="suggestion-chip">🛡️ How do I become a SOC Analyst?</button>
+    <button type="button" class="suggestion-chip">⚔️ Path to Ethical Hacker & PenTester</button>
+    <button type="button" class="suggestion-chip">📜 Top certifications for college students</button>
+    <button type="button" class="suggestion-chip">🚀 High-impact projects for my resume</button>
+    <button type="button" class="suggestion-chip">🌐 Explain the TCP 3-way handshake</button>
+    <button type="button" class="suggestion-chip">💼 Internship & technical interview tips</button>
+  </div>
+
+  <!-- Message Input Form -->
+  <form class="chat-input-area" id="chatForm">
+    <input type="text" class="chat-input" id="chatInput" placeholder="Ask Cyber Copilot about careers, certs, projects, or interview concepts..." autocomplete="off" required>
+    <button type="submit" class="btn btn-primary" id="chatSendBtn">
+      <span>Send</span>
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </button>
+  </form>
+</div>
+{% endblock %}
