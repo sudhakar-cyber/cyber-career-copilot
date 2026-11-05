@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
 
 # Load .env file from project root
@@ -27,6 +28,9 @@ class Config:
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '').strip()
 
     # Session settings
+    SESSION_COOKIE_NAME = 'cyber_copilot_session'
+    SESSION_COOKIE_PATH = '/'
+    SESSION_COOKIE_SECURE = False  # Allows persistent session cookie on localhost HTTP
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
-    PERMANENT_SESSION_LIFETIME = 86400  # 24 hours
+    PERMANENT_SESSION_LIFETIME = timedelta(days=7)  # Keep user logged in across refreshes and restarts

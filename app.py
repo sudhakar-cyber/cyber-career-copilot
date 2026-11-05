@@ -4,7 +4,7 @@ from functools import wraps
 from datetime import datetime, timezone
 from flask import (
     Flask, render_template, request, redirect, url_for, 
-    flash, session, jsonify, g
+    flash, session, jsonify, g, make_response
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -23,6 +23,20 @@ with app.app_context():
     except Exception as e:
         print(f"[Error] Initializing DB: {e}")
 
+# Keep sessions permanent across browser refreshes
+@app.before_request
+def ensure_session_persistence():
+    session.permanent = True
+
+# Prevent browser caching of authenticated views to defeat Back button exposure after logout
+@app.after_request
+def add_security_and_cache_control_headers(response):
+    if response.content_type and 'text/html' in response.content_type:
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, private'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
+
 # Authentication decorator
 def login_required(f):
     @wraps(f)
@@ -30,6 +44,15 @@ def login_required(f):
         if 'user_id' not in session:
             flash("Please sign in to access your Cyber Copilot workspace.", "info")
             return redirect(url_for('login', next=request.url))
+        
+        # Verify active account still exists in database
+        user = db.query_one("SELECT id FROM users WHERE id = %s", (session['user_id'],))
+        if not user:
+            session.clear()
+            flash("Session expired or user account not found. Please log in again.", "warning")
+            return redirect(url_for('login'))
+
+        session.permanent = True
         return f(*args, **kwargs)
     return decorated_function
 
@@ -105,8 +128,10 @@ def register():
             (user_id,)
         )
 
+        session.permanent = True
         session['user_id'] = user_id
         session['user_name'] = full_name
+        session.modified = True
         flash(f"Welcome aboard, {full_name}! Complete your cybersecurity profile to customize your roadmap.", "success")
         return redirect(url_for('profile'))
 
@@ -133,8 +158,10 @@ def login():
         # Update last login timestamp
         db.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = %s", (user['id'],))
 
+        session.permanent = True
         session['user_id'] = user['id']
         session['user_name'] = user['full_name']
+        session.modified = True
         flash(f"Welcome back, {user['full_name']}! System ready.", "success")
 
         next_page = request.args.get('next')
@@ -147,8 +174,12 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
+    cookie_name = app.config.get('SESSION_COOKIE_NAME', 'cyber_copilot_session')
+    response = make_response(redirect(url_for('login')))
+    response.delete_cookie(cookie_name, path='/')
+    response.delete_cookie('session', path='/')
     flash("You have been successfully logged out. Secure session terminated.", "info")
-    return redirect(url_for('login'))
+    return response
 
 # -------------------------------------------------------------
 # Student Profile Routes

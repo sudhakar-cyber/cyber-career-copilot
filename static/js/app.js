@@ -3,45 +3,102 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Mobile Sidebar Toggle
+    // 1. Mobile Sidebar Toggle & Backdrop
     const mobileBtn = document.getElementById('mobileMenuBtn');
     const sidebar = document.getElementById('appSidebar');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+    const toggleSidebar = (open) => {
+        if (!sidebar) return;
+        const shouldOpen = open !== undefined ? open : !sidebar.classList.contains('open');
+        if (shouldOpen) {
+            sidebar.classList.add('open');
+            if (sidebarBackdrop) sidebarBackdrop.classList.add('active');
+            document.body.classList.add('sidebar-open');
+        } else {
+            sidebar.classList.remove('open');
+            if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
+        }
+    };
 
     if (mobileBtn && sidebar) {
-        mobileBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
+        mobileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleSidebar();
         });
+
+        if (sidebarBackdrop) {
+            sidebarBackdrop.addEventListener('click', () => {
+                toggleSidebar(false);
+            });
+        }
 
         // Close sidebar on click outside on mobile
         document.addEventListener('click', (e) => {
             if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
                 if (!sidebar.contains(e.target) && !mobileBtn.contains(e.target)) {
-                    sidebar.classList.remove('open');
+                    toggleSidebar(false);
                 }
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                toggleSidebar(false);
             }
         });
     }
 
-    // 2. Flash Alert Auto-Dismiss
+    // 2. Password Visibility Toggle for Authentication Forms
+    const passwordToggleBtn = document.getElementById('passwordToggleBtn');
+    const passwordInput = document.getElementById('password');
+
+    if (passwordToggleBtn && passwordInput) {
+        passwordToggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const currentType = passwordInput.getAttribute('type');
+            const isPassword = currentType === 'password';
+            
+            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+            
+            const eyeShow = passwordToggleBtn.querySelector('.eye-icon-show');
+            const eyeHide = passwordToggleBtn.querySelector('.eye-icon-hide');
+            
+            if (eyeShow && eyeHide) {
+                eyeShow.style.display = isPassword ? 'none' : 'block';
+                eyeHide.style.display = isPassword ? 'block' : 'none';
+            }
+            
+            passwordToggleBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+            passwordToggleBtn.setAttribute('title', isPassword ? 'Hide password' : 'Show password');
+            passwordInput.focus();
+        });
+    }
+
+    // 3. Flash Alert Auto-Dismiss
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(alert => {
         const closeBtn = alert.querySelector('.alert-close');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
                 alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-6px)';
                 setTimeout(() => alert.remove(), 250);
             });
         }
-        // Auto fade after 5 seconds
+        // Auto fade after 6 seconds
         setTimeout(() => {
             if (alert.parentNode) {
                 alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-6px)';
                 setTimeout(() => alert.remove(), 250);
             }
-        }, 5000);
+        }, 6000);
     });
 
-    // 3. Roadmap Task Completion Checkbox (AJAX)
+    // 4. Roadmap Task Completion Checkbox (AJAX)
     const taskCheckboxes = document.querySelectorAll('.task-toggle-btn');
     taskCheckboxes.forEach(btn => {
         btn.addEventListener('click', async (e) => {
@@ -84,10 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 4. Project Status Selector Update (AJAX)
+    // 5. Project Status Selector Update (AJAX)
     const projectSelectors = document.querySelectorAll('.project-status-select');
     projectSelectors.forEach(select => {
-        select.addEventListener('change', async (e) => {
+        select.addEventListener('change', async () => {
             const projectId = select.getAttribute('data-project-id');
             const newStatus = select.value;
             const card = document.getElementById(`project-card-${projectId}`);
@@ -108,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 5. Accessible Dialog / Modal Management (Modern Web Standards)
+    // 6. Accessible Dialog / Modal Management
     const modalOpenTriggers = document.querySelectorAll('[data-open-modal]');
     modalOpenTriggers.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -145,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 6. Cyber Copilot Chatbot Handler
+    // 7. Cyber Copilot Chatbot Handler
     const chatForm = document.getElementById('chatForm');
     const chatInput = document.getElementById('chatInput');
     const chatMessages = document.getElementById('chatMessages');
@@ -257,3 +314,10 @@ function escapeHtml(str) {
         }[m];
     });
 }
+
+// Ensure Back button does not show cached protected views after logout
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted || (window.performance && window.performance.navigation && window.performance.navigation.type === 2)) {
+        window.location.reload();
+    }
+});

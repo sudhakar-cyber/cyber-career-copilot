@@ -153,5 +153,73 @@ class CyberCareerCopilotTestCase(unittest.TestCase):
         self.assertIn('mode', data)
         self.assertIn('DEMO MODE', data['response'])
 
+    def test_06_session_handling_and_logout(self):
+        """Test persistent session on refresh, logout redirect, cache prevention, and logout buttons"""
+        # Register and login
+        self.client.post('/register', data={
+            'full_name': 'Session Cadet',
+            'email': 'cadet@test.edu',
+            'password': 'StrongPassword123!',
+            'confirm_password': 'StrongPassword123!'
+        }, follow_redirects=True)
+
+        # 1. Simulate browser refresh (consecutive requests with same session client)
+        resp1 = self.client.get('/dashboard')
+        self.assertEqual(resp1.status_code, 200)
+        self.assertIn(b'Session Cadet', resp1.data)
+
+        resp2 = self.client.get('/dashboard')
+        self.assertEqual(resp2.status_code, 200)
+        self.assertIn(b'Session Cadet', resp2.data)
+
+        # 2. Check visible logout buttons in DOM
+        self.assertIn(b'id="dashboardHeroLogoutBtn"', resp2.data)
+        self.assertIn(b'id="headerLogoutBtn"', resp2.data)
+        self.assertIn(b'id="sidebarLogoutBtn"', resp2.data)
+
+        # 3. Check anti-caching headers (prevents browser Back button from exposing cached dashboard)
+        cache_control = resp2.headers.get('Cache-Control', '')
+        self.assertIn('no-store', cache_control)
+        self.assertIn('no-cache', cache_control)
+        self.assertIn('must-revalidate', cache_control)
+
+        # 4. Perform logout
+        logout_resp = self.client.get('/logout')
+        self.assertEqual(logout_resp.status_code, 302)
+        self.assertIn('/login', logout_resp.headers.get('Location', ''))
+
+        # 5. Access dashboard after logout (must be blocked & redirected to /login)
+        post_logout_resp = self.client.get('/dashboard')
+        self.assertEqual(post_logout_resp.status_code, 302)
+        self.assertIn('/login', post_logout_resp.headers.get('Location', ''))
+
+        # Follow redirect lands on login page with sign-in prompt
+        followed_resp = self.client.get('/dashboard', follow_redirects=True)
+        self.assertEqual(followed_resp.status_code, 200)
+        self.assertIn(b'Sign In to Cyber Copilot', followed_resp.data)
+
+    def test_07_unauthorized_access_protection(self):
+        """Test that all protected dashboard routes deny unauthenticated access"""
+        protected_routes = [
+            '/dashboard',
+            '/profile',
+            '/careers',
+            '/skill-gap',
+            '/roadmap',
+            '/projects',
+            '/interview',
+            '/certifications',
+            '/chatbot'
+        ]
+
+        # Ensure no session is active
+        self.client.get('/logout')
+
+        for route in protected_routes:
+            with self.subTest(route=route):
+                resp = self.client.get(route)
+                self.assertEqual(resp.status_code, 302, f"Route {route} was not protected (expected 302)")
+                self.assertIn('/login', resp.headers.get('Location', ''), f"Route {route} did not redirect to /login")
+
 if __name__ == '__main__':
     unittest.main()
